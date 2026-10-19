@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld('safetube', {
   finishSetup: call('finish-setup'),
   openGuideLink: call('open-guide-link'),
 
+  settings: call('settings'),
+
   // Library (approved videos only)
   feed: call('feed'),
   categories: call('categories'),
@@ -32,5 +34,6 @@ contextBridge.exposeInMainWorld('safetube', {
     hideVideo: call('parent:hide-video'),
     unhideVideo: call('parent:unhide-video'),
     sync: call('parent:sync'),
+    setPremium: call('parent:set-premium'),
   },
 });

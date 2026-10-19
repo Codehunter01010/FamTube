@@ -65,7 +65,7 @@ const ready = (async () => {
     idb(db, 'readonly', (s) => s.get('library')),
   ]);
   const settingsStore = idbStorage(db, 'settings', null);
-  const state = { settings: { setupDone: false, pinSalt: null, pinHash: null, apiKey: null, ...(settings || {}) } };
+  const state = { settings: { setupDone: false, pinSalt: null, pinHash: null, apiKey: null, premium: false, ...(settings || {}) } };
   state.saveSettings = () => settingsStore.save(state.settings);
   state.library = new Library(idbStorage(db, 'library', libData || null));
   return state;
@@ -167,6 +167,11 @@ window.safetube = {
     return true;
   },
 
+  async settings() {
+    const { settings } = await ready;
+    return { premium: !!settings.premium };
+  },
+
   // Library (approved videos only)
   feed: lib((l, category) => l.feed(category || null)),
   categories: lib((l) => l.categories()),
@@ -192,7 +197,12 @@ window.safetube = {
       hidden: s.library.data.hidden,
       lastSync: s.library.data.lastSync,
       syncing: !!syncing,
+      premium: !!s.settings.premium,
     })),
+    setPremium: parentOnly((s, on) => {
+      s.settings.premium = !!on;
+      s.saveSettings();
+    }),
     findChannel: parentOnly(async (s, input) => {
       const text = String(input || '').trim();
       if (!text) return { results: [] };

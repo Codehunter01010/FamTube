@@ -12,7 +12,9 @@ test('PIN is stored hashed and checked correctly', () => {
   const dir = tmp();
   const s = new Store(dir);
   s.setPin('1234');
-  assert.ok(!fs.readFileSync(path.join(dir, 'settings.json'), 'utf8').includes('1234'));
+  // The PIN itself is never stored (a random hash could contain "1234", so check values, not text).
+  const saved = JSON.parse(fs.readFileSync(path.join(dir, 'settings.json'), 'utf8'));
+  assert.ok(!Object.values(saved).includes('1234'));
   const again = new Store(dir);
   assert.ok(again.checkPin('1234'));
   assert.ok(!again.checkPin('4321'));

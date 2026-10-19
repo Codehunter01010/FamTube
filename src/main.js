@@ -15,7 +15,7 @@ const EXTERNAL_ALLOWLIST = [
 ];
 
 const RENDERER_DIR = path.join(__dirname, 'renderer');
-const EMBED_PREFIX = 'https://www.youtube-nocookie.com/embed/';
+const EMBED_PREFIXES = ['https://www.youtube-nocookie.com/embed/', 'https://www.youtube.com/embed/'];
 const SYNC_EVERY_MS = 6 * 60 * 60 * 1000;
 
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.png': 'image/png' };
@@ -70,8 +70,9 @@ function createWindow() {
 
 function isAllowedFrameUrl(url) {
   if (url === 'about:blank') return true;
-  if (!url.startsWith(EMBED_PREFIX)) return false;
-  const id = url.slice(EMBED_PREFIX.length).split(/[?#/]/)[0];
+  const prefix = EMBED_PREFIXES.find((p) => url.startsWith(p));
+  if (!prefix) return false;
+  const id = url.slice(prefix.length).split(/[?#/]/)[0];
   return library.isAllowed(id);
 }
 
@@ -190,6 +191,7 @@ ipcMain.handle('open-guide-link', (_e, url) => {
 
 // ---- What the child sees (always filtered by the library) -----------------
 
+ipcMain.handle('settings', () => ({ premium: !!store.data.premium }));
 ipcMain.handle('feed', (_e, category) => library.feed(category || null));
 ipcMain.handle('categories', () => library.categories());
 ipcMain.handle('channels', () => library.channels.map(({ id, title, thumb, handle, subscribers }) => ({ id, title, thumb, handle, subscribers })));
@@ -225,7 +227,13 @@ ipcMain.handle('parent:info', parentOnly(() => ({
   hidden: library.data.hidden,
   lastSync: library.data.lastSync,
   syncing: !!syncing,
+  premium: !!store.data.premium,
 })));
+
+ipcMain.handle('parent:set-premium', parentOnly((on) => {
+  store.data.premium = !!on;
+  store.save();
+}));
 
 ipcMain.handle('parent:find-channel', parentOnly(async (input) => {
   const text = String(input || '').trim();

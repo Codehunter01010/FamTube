@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const DEFAULTS = { setupDone: false, pinSalt: null, pinHash: null, apiKey: null };
+const DEFAULTS = { setupDone: false, pinSalt: null, pinHash: null, apiKey: null, premium: false };
 
 class Store {
   constructor(dir) {

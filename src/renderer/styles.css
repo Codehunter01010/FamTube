@@ -237,3 +237,6 @@ body.watching .content { left: 0; }
 .cat input:focus-visible + span { outline: 2px solid var(--accent); }
 .danger { color: var(--error); }
 .mono { font-family: Consolas, monospace; }
+
+.switch-row { display: flex; align-items: center; gap: 10px; font-weight: 500; cursor: pointer; }
+.switch-row input { width: 18px; height: 18px; accent-color: var(--text); }

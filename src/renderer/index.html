@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; connect-src 'self' https://www.googleapis.com; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
+        content="default-src 'self'; connect-src 'self' https://www.googleapis.com; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com https://www.youtube.com">
   <title>FamTube</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -146,6 +146,14 @@
       <button class="btn-primary" id="sync-btn">Check for new videos</button>
     </div>
     <p class="msg" id="sync-msg"></p>
+
+    <h3>YouTube Premium</h3>
+    <label class="switch-row">
+      <input type="checkbox" id="premium">
+      <span>Use my YouTube Premium account (no ads)</span>
+    </label>
+    <p class="hint">Turn this on, then sign in to youtube.com once in this browser with your Premium account. Videos then play without ads.</p>
+    <p class="msg" id="premium-msg"></p>
 
     <h3>YouTube API key</h3>
     <form class="row" id="key-form">
