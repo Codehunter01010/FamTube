@@ -25,7 +25,18 @@
       </button>
     </form>
     <div class="topbar-end">
-      <button class="avatar" id="avatar" aria-label="Account">S</button>
+      <div class="account">
+        <button class="avatar" id="avatar" aria-label="Account menu" aria-haspopup="menu" aria-expanded="false">S</button>
+        <div class="account-menu" id="account-menu" role="menu" hidden>
+          <button class="menu-item" id="menu-add" role="menuitem">
+            <svg viewBox="0 0 24 24"><path d="M20 12h-8V4h-1v8H3v1h8v8h1v-8h8z"/></svg>Add channels
+          </button>
+          <button class="menu-item" id="menu-settings" role="menuitem">
+            <svg viewBox="0 0 24 24"><path d="M12 9.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5m0-1a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM13.86 3l.45 2.31.08.44.41.17c.54.22 1.04.51 1.5.86l.36.27.42-.14 2.23-.76 1.86 3.23-1.77 1.55-.33.29.06.44c.04.28.06.57.06.84s-.02.56-.06.84l-.06.44.33.29 1.77 1.55-1.86 3.23-2.23-.76-.42-.14-.36.27c-.46.35-.96.64-1.5.86l-.41.17-.08.44-.45 2.31h-3.72l-.45-2.31-.08-.44-.41-.17a6.6 6.6 0 0 1-1.5-.86l-.36-.27-.42.14-2.23.76-1.86-3.23 1.77-1.55.33-.29-.06-.44A6.3 6.3 0 0 1 5.5 12c0-.27.02-.56.06-.84l.06-.44-.33-.29-1.77-1.55 1.86-3.23 2.23.76.42.14.36-.27c.46-.35.96-.64 1.5-.86l.41-.17.08-.44L10.14 3h3.72m.82-1H9.32l-.6 3.11c-.62.25-1.19.58-1.71.98l-3-1.02-2.68 4.64 2.38 2.09a7.4 7.4 0 0 0 0 1.96l-2.38 2.09 2.68 4.64 3-1.02c.52.4 1.09.73 1.71.98l.6 3.11h5.36l.6-3.11c.62-.25 1.19-.58 1.71-.98l3 1.02 2.68-4.64-2.38-2.09a7.4 7.4 0 0 0 0-1.96l2.38-2.09-2.68-4.64-3 1.02a7.6 7.6 0 0 0-1.71-.98L14.68 2z"/></svg>Settings
+          </button>
+          <p class="menu-note">For parents. Needs the PIN.</p>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -118,6 +129,12 @@
       <h2>Parent area</h2>
       <button class="btn-text" id="parent-close">Close</button>
     </div>
+    <div class="parent-tabs" role="tablist">
+      <button class="parent-tab" data-tab="channels" role="tab">Channels</button>
+      <button class="parent-tab" data-tab="settings" role="tab">Settings</button>
+    </div>
+
+    <div class="parent-panel" id="tab-channels">
 
     <h3>Add a channel</h3>
     <p class="hint">Type a channel name (for example "Tom and Jerry"), or paste a channel link or @handle.</p>
@@ -140,6 +157,9 @@
     <p class="msg" id="hide-msg"></p>
     <div class="hidden-list" id="hidden-list"></div>
 
+    </div>
+
+    <div class="parent-panel" id="tab-settings">
     <h3>Updates</h3>
     <div class="row center">
       <span id="sync-info" class="grow"></span>
@@ -161,6 +181,7 @@
       <button class="btn-primary">Save</button>
     </form>
     <p class="msg" id="parent-key-msg"></p>
+    </div>
   </dialog>
 
   <!-- First-run setup wizard -->
@@ -215,7 +236,7 @@
       <section data-step="3">
         <h1>All set</h1>
         <p>Next, add your approved channels in the parent area. It opens as soon as you press Start.</p>
-        <p><strong>To open the parent area later:</strong> press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd>, or press and hold the round letter in the top-right corner for 3 seconds.</p>
+        <p><strong>To open the parent area later:</strong> click the round letter in the top-right corner and choose <em>Add channels</em> or <em>Settings</em>. It always asks for your PIN.</p>
         <div class="actions"><button class="btn-primary" id="finish">Start</button></div>
       </section>
     </div>

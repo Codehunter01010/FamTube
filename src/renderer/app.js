@@ -273,27 +273,40 @@ api.onLibraryUpdated(() => {
   if (parentOpen) renderParent();
 });
 
-// ---- Parent area (hidden entry: Ctrl+Shift+Y, or hold the avatar 3 s) -----
+// ---- Parent area (opened from the account menu, behind the PIN) ----------
 
 let parentOpen = false;
+// Where the parent area should open after the PIN: 'add' or 'settings'.
+let parentTarget = 'add';
 
-function openPinPrompt() {
+function openPinPrompt(target = 'add') {
+  parentTarget = target;
+  closeAccountMenu();
   $('pin-entry').value = '';
   $('pin-error').textContent = '';
   $('pin-dialog').showModal();
   $('pin-entry').focus();
 }
 
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'y' && $('wizard').hidden) openPinPrompt();
-});
+function closeAccountMenu() {
+  $('account-menu').hidden = true;
+  $('avatar').setAttribute('aria-expanded', 'false');
+}
 
-let holdTimer = null;
-const avatar = $('avatar');
-avatar.addEventListener('pointerdown', () => {
-  holdTimer = setTimeout(openPinPrompt, 3000);
+$('avatar').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const menu = $('account-menu');
+  menu.hidden = !menu.hidden;
+  $('avatar').setAttribute('aria-expanded', String(!menu.hidden));
 });
-['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => avatar.addEventListener(ev, () => clearTimeout(holdTimer)));
+$('menu-add').addEventListener('click', () => openPinPrompt('add'));
+$('menu-settings').addEventListener('click', () => openPinPrompt('settings'));
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#account-menu')) closeAccountMenu();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeAccountMenu();
+});
 
 $('pin-cancel').addEventListener('click', () => $('pin-dialog').close());
 $('pin-form').addEventListener('submit', async (e) => {
@@ -304,18 +317,30 @@ $('pin-form').addEventListener('submit', async (e) => {
     return;
   }
   $('pin-dialog').close();
-  openParent();
+  openParent(parentTarget);
 });
 
-function openParent() {
+function openParent(target = 'add') {
   parentOpen = true;
   ['find-input', 'hide-input', 'parent-key'].forEach((id) => ($(id).value = ''));
   ['find-msg', 'hide-msg', 'sync-msg', 'premium-msg', 'parent-key-msg'].forEach((id) => setMsg(id, ''));
   $('found').innerHTML = '';
   $('parent-dialog').showModal();
   renderParent();
-  $('find-input').focus();
+  showParentTab(target === 'settings' ? 'settings' : 'channels');
 }
+
+function showParentTab(name) {
+  document.querySelectorAll('.parent-tab').forEach((t) => {
+    t.classList.toggle('active', t.dataset.tab === name);
+    t.setAttribute('aria-selected', String(t.dataset.tab === name));
+  });
+  document.querySelectorAll('.parent-panel').forEach((p) => (p.hidden = p.id !== `tab-${name}`));
+  $('parent-dialog').scrollTop = 0;
+  if (name === 'channels') $('find-input').focus();
+}
+
+document.querySelectorAll('.parent-tab').forEach((t) => t.addEventListener('click', () => showParentTab(t.dataset.tab)));
 
 function closeParent() {
   parentOpen = false;
