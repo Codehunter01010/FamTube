@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
+  <title>YouTube</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-start">
+      <button class="icon-btn" id="menu-btn" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M21 6H3V5h18v1zm0 5H3v1h18v-1zm0 6H3v1h18v-1z"/></svg>
+      </button>
+      <a class="logo" href="#" id="logo" aria-label="YouTube Home">
+        <svg class="logo-mark" viewBox="0 0 28 20"><path fill="#FF0033" d="M27.4 3.1A3.5 3.5 0 0 0 25 .6C22.8 0 14 0 14 0S5.2 0 3 .6A3.5 3.5 0 0 0 .6 3.1C0 5.3 0 10 0 10s0 4.7.6 6.9A3.5 3.5 0 0 0 3 19.4c2.2.6 11 .6 11 .6s8.8 0 11-.6a3.5 3.5 0 0 0 2.4-2.5c.6-2.2.6-6.9.6-6.9s0-4.7-.6-6.9z"/><path fill="#fff" d="M11.2 14.3 18.5 10l-7.3-4.3z"/></svg>
+        <span class="logo-word">YouTube</span>
+      </a>
+    </div>
+    <form class="search" id="search-form" role="search">
+      <input id="search-input" type="search" placeholder="Search" autocomplete="off">
+      <button class="search-btn" aria-label="Search">
+        <svg viewBox="0 0 24 24"><path d="m20.87 20.17-5.59-5.59A6.96 6.96 0 0 0 17 10c0-3.87-3.13-7-7-7s-7 3.13-7 7 3.13 7 7 7c1.75 0 3.35-.65 4.58-1.71l5.59 5.59.7-.71zM10 16c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+      </button>
+    </form>
+    <div class="topbar-end">
+      <button class="avatar" id="avatar" aria-label="Account">S</button>
+    </div>
+  </header>
+
+  <nav class="sidebar" id="sidebar">
+    <a class="side-item active" href="#">
+      <svg viewBox="0 0 24 24"><path d="M4 21V10.08l8-6.96 8 6.96V21h-6v-6h-4v6H4z"/></svg><span>Home</span>
+    </a>
+    <a class="side-item" href="#">
+      <svg viewBox="0 0 24 24"><path d="M20 7H4V6h16v1zm2 2v12H2V9h20zm-7 6-5-3v6l5-3zm2-12H7v1h10V3z"/></svg><span>Subscriptions</span>
+    </a>
+    <hr>
+    <a class="side-item" href="#">
+      <svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 9c-4.42 0-8 2.24-8 5v3h16v-3c0-2.76-3.58-5-8-5zm7 7H5v-2c0-2.17 3.13-4 7-4s7 1.83 7 4v2z"/></svg><span>You</span>
+    </a>
+  </nav>
+
+  <main class="content">
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden><span>No videos yet. Ask a grown-up to add some channels.</span></p>
+  </main>
+
+  <!-- Parent PIN prompt -->
+  <dialog id="pin-dialog" class="dialog">
+    <form method="dialog" id="pin-form">
+      <h2>Parent area</h2>
+      <p>Enter your PIN.</p>
+      <input id="pin-entry" type="password" inputmode="numeric" maxlength="8" autocomplete="off">
+      <p class="error" id="pin-error"></p>
+      <div class="actions">
+        <button type="button" class="btn-text" id="pin-cancel">Cancel</button>
+        <button type="submit" class="btn-primary">Open</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Parent area (phase 1: change API key; channels come in phase 2) -->
+  <dialog id="parent-dialog" class="dialog wide">
+    <h2>Parent area</h2>
+    <p>Adding and removing channels comes in the next version.</p>
+    <h3>YouTube API key</h3>
+    <div class="row">
+      <input id="parent-key" type="text" placeholder="Paste a new API key" autocomplete="off" spellcheck="false">
+      <button class="btn-primary" id="parent-key-save">Save</button>
+    </div>
+    <p class="msg" id="parent-key-msg"></p>
+    <div class="actions">
+      <button class="btn-text" id="parent-close">Close</button>
+    </div>
+  </dialog>
+
+  <!-- First-run setup wizard -->
+  <div class="wizard" id="wizard" hidden>
+    <div class="wizard-card">
+      <div class="wizard-steps" id="wizard-dots"></div>
+
+      <section data-step="0">
+        <h1>Welcome</h1>
+        <p>This sets up YouTube for your family so it only shows channels you approve.</p>
+        <p>It takes about 5 minutes and only needs to be done once. A parent should do this part.</p>
+        <div class="actions"><button class="btn-primary" data-next>Get started</button></div>
+      </section>
+
+      <section data-step="1">
+        <h1>Choose a parent PIN</h1>
+        <p>You'll use this PIN to add or remove channels. Pick 4 to 8 numbers your child doesn't know.</p>
+        <label>PIN <input id="pin1" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label>
+        <label>Type it again <input id="pin2" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></label>
+        <p class="error" id="pin-setup-error"></p>
+        <div class="actions"><button class="btn-primary" id="pin-save">Next</button></div>
+      </section>
+
+      <section data-step="2">
+        <h1>Get a free YouTube key</h1>
+        <p>The app needs a free key from Google to load videos. You only do this once.</p>
+        <ol class="guide">
+          <li>
+            <strong>Open Google Cloud and sign in</strong> with your normal Google account.
+            If asked, agree to the terms and create a project (any name, for example "Family YouTube").
+            <button class="btn-link" data-open="https://console.cloud.google.com/projectcreate">Open Google Cloud</button>
+          </li>
+          <li>
+            <strong>Turn on the YouTube API.</strong> On this page, press the blue <em>Enable</em> button.
+            <button class="btn-link" data-open="https://console.cloud.google.com/apis/library/youtube.googleapis.com">Open the YouTube API page</button>
+          </li>
+          <li>
+            <strong>Create the key.</strong> On this page, press <em>+ Create credentials</em>, then <em>API key</em>.
+            Copy the key it shows (it starts with "AIza").
+            <button class="btn-link" data-open="https://console.cloud.google.com/apis/credentials">Open the Credentials page</button>
+          </li>
+          <li><strong>Paste the key here</strong> and press Check.</li>
+        </ol>
+        <div class="row">
+          <input id="api-key" type="text" placeholder="AIza..." autocomplete="off" spellcheck="false">
+          <button class="btn-primary" id="key-check">Check</button>
+        </div>
+        <p class="msg" id="key-msg"></p>
+        <p class="hint">It's free. Google doesn't charge for this unless you add billing yourself.</p>
+      </section>
+
+      <section data-step="3">
+        <h1>All set</h1>
+        <p>Next, you'll add your approved channels from the parent area. That arrives in the next version.</p>
+        <p><strong>To open the parent area later:</strong> press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>, or press and hold the round letter in the top-right corner for 3 seconds.</p>
+        <div class="actions"><button class="btn-primary" id="finish">Start</button></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

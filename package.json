@@ -1,0 +1,48 @@
+{
+  "name": "safetube",
+  "productName": "YouTube",
+  "version": "0.1.0",
+  "description": "Family YouTube with approved channels only",
+  "main": "src/main.js",
+  "author": "Family",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.js",
+    "dist:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "build": {
+    "appId": "family.safetube",
+    "productName": "YouTube",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "YouTube",
+      "artifactName": "YouTube-Family-Setup-${version}.exe",
+      "runAfterFinish": true
+    },
+    "publish": null
+  },
+  "devDependencies": {
+    "@fontsource/roboto": "^5.3.0",
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3"
+  }
+}
