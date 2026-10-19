@@ -39,7 +39,7 @@ function createWindow() {
     width: 1280,
     height: 800,
     show: false,
-    title: 'YouTube',
+    title: 'FamTube',
     backgroundColor: '#0f0f0f',
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     autoHideMenuBar: true,

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; connect-src 'self' https://www.googleapis.com; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
-  <title>YouTube</title>
+  <title>FamTube</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,9 +13,9 @@
       <button class="icon-btn" id="menu-btn" aria-label="Menu">
         <svg viewBox="0 0 24 24"><path d="M21 6H3V5h18v1zm0 5H3v1h18v-1zm0 6H3v1h18v-1z"/></svg>
       </button>
-      <a class="logo" href="#/" id="logo" aria-label="YouTube Home">
-        <svg class="logo-mark" viewBox="0 0 28 20"><path fill="#FF0033" d="M27.4 3.1A3.5 3.5 0 0 0 25 .6C22.8 0 14 0 14 0S5.2 0 3 .6A3.5 3.5 0 0 0 .6 3.1C0 5.3 0 10 0 10s0 4.7.6 6.9A3.5 3.5 0 0 0 3 19.4c2.2.6 11 .6 11 .6s8.8 0 11-.6a3.5 3.5 0 0 0 2.4-2.5c.6-2.2.6-6.9.6-6.9s0-4.7-.6-6.9z"/><path fill="#fff" d="M11.2 14.3 18.5 10l-7.3-4.3z"/></svg>
-        <span class="logo-word">YouTube</span>
+      <a class="logo" href="#/" id="logo" aria-label="FamTube Home">
+        <svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#FFC83D"/><circle cx="8.3" cy="9.5" r="1.6" fill="#3B2A00"/><circle cx="15.7" cy="9.5" r="1.6" fill="#3B2A00"/><path d="M6.8 13.6c1.2 2.5 3.1 3.8 5.2 3.8s4-1.3 5.2-3.8" fill="none" stroke="#3B2A00" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="logo-word">FamTube</span>
       </a>
     </div>
     <form class="search" id="search-form" role="search">
@@ -162,7 +162,7 @@
 
       <section data-step="0">
         <h1>Welcome</h1>
-        <p>This sets up YouTube for your family so it only shows channels you approve.</p>
+        <p>This sets up FamTube for your family so it only shows channels you approve.</p>
         <p>It takes about 5 minutes and only needs to be done once. A parent should do this part.</p>
         <div class="actions"><button class="btn-primary" data-next>Get started</button></div>
       </section>
@@ -182,7 +182,7 @@
         <ol class="guide">
           <li>
             <strong>Open Google Cloud and sign in</strong> with your normal Google account.
-            If asked, agree to the terms and create a project (any name, for example "Family YouTube").
+            If asked, agree to the terms and create a project (any name, for example "FamTube").
             <button class="btn-link" data-open="https://console.cloud.google.com/projectcreate">Open Google Cloud</button>
           </li>
           <li>

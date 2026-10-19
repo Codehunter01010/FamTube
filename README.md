@@ -1,6 +1,6 @@
-# Family YouTube
+# FamTube
 
-A YouTube-style app that only shows channels a parent approved. No Shorts,
+A family video app that only shows YouTube channels a parent approved. No Shorts,
 no recommendations from YouTube, and nothing plays by itself.
 
 It comes in two forms that share the same interface and allowlist code:

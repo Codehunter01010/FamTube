@@ -1,8 +1,8 @@
 {
   "name": "safetube",
-  "productName": "YouTube",
+  "productName": "FamTube",
   "version": "0.2.0",
-  "description": "Family YouTube with approved channels only",
+  "description": "FamTube: YouTube channels approved by a parent, nothing else",
   "main": "src/main.js",
   "author": "Family",
   "license": "UNLICENSED",
@@ -14,8 +14,8 @@
     "build:web": "node scripts/build-web.js"
   },
   "build": {
-    "appId": "family.safetube",
-    "productName": "YouTube",
+    "appId": "family.famtube",
+    "productName": "FamTube",
     "files": [
       "src/**/*",
       "package.json"
@@ -35,8 +35,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "shortcutName": "YouTube",
-      "artifactName": "YouTube-Family-Setup-${version}.exe",
+      "shortcutName": "FamTube",
+      "artifactName": "FamTube-Setup-${version}.exe",
       "runAfterFinish": true
     },
     "publish": null
