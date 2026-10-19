@@ -180,6 +180,9 @@ window.safetube = {
   video: lib((l, id) => l.video(id)),
   upNext: lib((l, id) => l.upNext(id)),
   search: lib((l, q) => l.search(q)),
+  reportUnplayable: async (id) => {
+    if ((await ready).library.markUnplayable(id)) notify();
+  },
   onLibraryUpdated: (fn) => listeners.push(fn),
 
   // Parent area

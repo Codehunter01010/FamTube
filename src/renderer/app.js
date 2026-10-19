@@ -157,6 +157,7 @@ async function renderWatch(id) {
   showView('watch');
   playing = v;
   $('endscreen').hidden = true;
+  $('endscreen-msg').hidden = true;
   const params = new URLSearchParams({ autoplay: '1', rel: '0', playsinline: '1', iv_load_policy: '3', enablejsapi: '1', modestbranding: '1', origin: location.origin });
   $('player').src = `${playerHost}/embed/${encodeURIComponent(v.id)}?${params}`;
 
@@ -213,6 +214,14 @@ window.addEventListener('message', (e) => {
   if (playing && newId && newId !== playing.id) {
     const wanted = newId;
     api.video(wanted).then((v) => (v ? go(`#/watch/${wanted}`) : playing && renderWatch(playing.id)));
+    return;
+  }
+  // The video's owner blocks it outside youtube.com (or it was removed):
+  // leave it out of FamTube from now on and offer other approved videos.
+  if (playing && data?.event === 'onError') {
+    api.reportUnplayable(playing.id);
+    $('endscreen-msg').hidden = false;
+    $('endscreen').hidden = false;
     return;
   }
   const state = data?.info?.playerState ?? (data?.event === 'onStateChange' ? data.info : undefined);

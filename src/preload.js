@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('safetube', {
   video: call('video'),
   upNext: call('up-next'),
   search: call('search'),
+  reportUnplayable: call('report-unplayable'),
   onLibraryUpdated: (fn) => ipcRenderer.on('library-updated', () => fn()),
 
   // Parent area

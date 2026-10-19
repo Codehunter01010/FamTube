@@ -199,6 +199,9 @@ ipcMain.handle('channel-videos', (_e, id) => library.channelVideos(id));
 ipcMain.handle('video', (_e, id) => library.video(id));
 ipcMain.handle('up-next', (_e, id) => library.upNext(id));
 ipcMain.handle('search', (_e, q) => library.search(q));
+ipcMain.handle('report-unplayable', (_e, id) => {
+  if (library.markUnplayable(id)) notifyLibraryChanged();
+});
 
 // ---- Parent area (requires a recent correct PIN) --------------------------
 

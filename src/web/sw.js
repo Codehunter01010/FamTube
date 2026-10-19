@@ -1,6 +1,6 @@
 // Network first so updates arrive straight away; the cached copy is only
 // used when the internet is down.
-const CACHE = 'family-tube-v4';
+const CACHE = 'family-tube-v5';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));

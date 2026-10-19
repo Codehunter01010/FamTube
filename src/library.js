@@ -10,7 +10,7 @@ class Library {
   // desktop, browser storage in the web app.
   constructor(storage) {
     this.storage = storage;
-    this.data = { channels: [], hidden: [], videos: {}, lastSync: 0, ...(storage.load() || {}) };
+    this.data = { channels: [], hidden: [], unplayable: [], videos: {}, lastSync: 0, ...(storage.load() || {}) };
   }
 
   save() {
@@ -61,6 +61,15 @@ class Library {
     this.save();
   }
 
+  // A video whose owner blocks playback outside youtube.com. The player
+  // reports it the first time it fails; from then on it is left out.
+  markUnplayable(videoId) {
+    if (!this.isAllowed(videoId) || this.data.unplayable.includes(videoId)) return false;
+    this.data.unplayable.push(videoId);
+    this.save();
+    return true;
+  }
+
   setChannelVideos(channelId, videos) {
     // Ignore results for a channel that was removed while it was syncing.
     if (!this.channel(channelId)) return;
@@ -76,7 +85,7 @@ class Library {
   // ---- What the child can see ----
 
   allVideos() {
-    const hidden = new Set(this.data.hidden);
+    const hidden = new Set([...this.data.hidden, ...this.data.unplayable]);
     const out = [];
     for (const c of this.data.channels) {
       for (const v of this.data.videos[c.id] || []) {

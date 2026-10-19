@@ -50,6 +50,16 @@ test('hidden videos are never listed, searched, suggested or playable', () => {
   assert.ok(!lib.search('video').some((v) => v.id === 'tiger000001'));
 });
 
+test('videos that cannot play outside youtube.com stay out after a sync', () => {
+  const lib = setup();
+  assert.ok(lib.markUnplayable('goal0000001'));
+  assert.ok(!lib.markUnplayable('unknown0001'));
+  lib.setChannelVideos('UCbbbbbbbbbbbbbbbbbbbbbb', [vid('goal0000001', 'UCbbbbbbbbbbbbbbbbbbbbbb')]);
+  assert.ok(!lib.isAllowed('goal0000001'));
+  assert.ok(!lib.feed().some((v) => v.id === 'goal0000001'));
+  assert.deepStrictEqual(lib.data.hidden, []);
+});
+
 test('Shorts never appear even if cached', () => {
   const lib = setup();
   lib.setChannelVideos('UCaaaaaaaaaaaaaaaaaaaaaa', [vid('short000001', 'UCaaaaaaaaaaaaaaaaaaaaaa', { duration: 45 }), vid('short000002', 'UCaaaaaaaaaaaaaaaaaaaaaa', { title: 'Wow #shorts' })]);
