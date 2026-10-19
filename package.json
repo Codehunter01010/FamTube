@@ -1,7 +1,7 @@
 {
   "name": "safetube",
   "productName": "YouTube",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Family YouTube with approved channels only",
   "main": "src/main.js",
   "author": "Family",

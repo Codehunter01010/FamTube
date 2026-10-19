@@ -1,11 +1,36 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+const call = (channel) => (...args) => ipcRenderer.invoke(channel, ...args);
+
 contextBridge.exposeInMainWorld('safetube', {
-  state: () => ipcRenderer.invoke('state'),
-  setPin: (pin) => ipcRenderer.invoke('set-pin', pin),
-  checkPin: (pin) => ipcRenderer.invoke('check-pin', pin),
-  lockParent: () => ipcRenderer.invoke('lock-parent'),
-  setApiKey: (key) => ipcRenderer.invoke('set-api-key', key),
-  finishSetup: () => ipcRenderer.invoke('finish-setup'),
-  openGuideLink: (url) => ipcRenderer.invoke('open-guide-link', url),
+  // Setup and PIN
+  state: call('state'),
+  setPin: call('set-pin'),
+  checkPin: call('check-pin'),
+  lockParent: call('lock-parent'),
+  setApiKey: call('set-api-key'),
+  finishSetup: call('finish-setup'),
+  openGuideLink: call('open-guide-link'),
+
+  // Library (approved videos only)
+  feed: call('feed'),
+  categories: call('categories'),
+  channels: call('channels'),
+  channelVideos: call('channel-videos'),
+  video: call('video'),
+  upNext: call('up-next'),
+  search: call('search'),
+  onLibraryUpdated: (fn) => ipcRenderer.on('library-updated', () => fn()),
+
+  // Parent area
+  parent: {
+    info: call('parent:info'),
+    findChannel: call('parent:find-channel'),
+    addChannel: call('parent:add-channel'),
+    setCategories: call('parent:set-categories'),
+    removeChannel: call('parent:remove-channel'),
+    hideVideo: call('parent:hide-video'),
+    unhideVideo: call('parent:unhide-video'),
+    sync: call('parent:sync'),
+  },
 });

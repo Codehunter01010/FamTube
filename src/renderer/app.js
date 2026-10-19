@@ -1,42 +1,276 @@
 const api = window.safetube;
 const $ = (id) => document.getElementById(id);
 
-const CATEGORIES = ['All', 'Soccer', 'Sports', 'Animals', 'Cartoons', 'Anime', 'Minecraft'];
+const EMBED = 'https://www.youtube-nocookie.com/embed/';
 
-// ---- Home shell -----------------------------------------------------------
+// ---- Formatting -----------------------------------------------------------
 
-function renderChips() {
-  const chips = $('chips');
-  chips.innerHTML = '';
-  CATEGORIES.forEach((name, i) => {
-    const b = document.createElement('button');
-    b.className = 'chip' + (i === 0 ? ' active' : '');
-    b.textContent = name;
-    b.addEventListener('click', () => {
-      chips.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-      b.classList.add('active');
-    });
-    chips.appendChild(b);
-  });
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-function renderPlaceholderGrid() {
-  const grid = $('grid');
-  grid.innerHTML = '';
-  for (let i = 0; i < 12; i++) {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = '<div class="thumb"></div><div class="meta"><div class="chan"></div><div class="lines"><div class="line"></div><div class="line short"></div></div></div>';
-    grid.appendChild(card);
+function compact(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(n < 1e10 ? 1 : 0).replace(/\.0$/, '') + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(n < 1e7 ? 1 : 0).replace(/\.0$/, '') + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(n < 1e4 ? 1 : 0).replace(/\.0$/, '') + 'K';
+  return String(n);
+}
+
+const views = (n) => `${compact(n)} view${n === 1 ? '' : 's'}`;
+
+function ago(iso) {
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  const units = [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]];
+  for (const [name, secs] of units) {
+    const n = Math.floor(s / secs);
+    if (n >= 1) return `${n} ${name}${n > 1 ? 's' : ''} ago`;
   }
-  $('empty').hidden = false;
+  return 'just now';
 }
 
+function duration(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = String(sec % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+}
+
+const avatarImg = (url, cls = 'chan') => (url ? `<img class="${cls}" src="${esc(url)}" alt="" referrerpolicy="no-referrer">` : `<div class="${cls}"></div>`);
+
+// ---- Cards ----------------------------------------------------------------
+
+function gridCard(v, { showChannel = true } = {}) {
+  return `<a class="card" href="#/watch/${esc(v.id)}">
+    <div class="thumb"><img src="${esc(v.thumb)}" alt="" loading="lazy"><span class="dur">${duration(v.duration)}</span></div>
+    <div class="meta">
+      ${showChannel ? `<span class="chan-link" data-channel="${esc(v.channelId)}">${avatarImg(v.channelThumb)}</span>` : ''}
+      <div class="lines">
+        <h3 class="title">${esc(v.title)}</h3>
+        ${showChannel ? `<div class="sub" data-channel="${esc(v.channelId)}">${esc(v.channelTitle)}</div>` : ''}
+        <div class="sub">${views(v.views)} • ${ago(v.publishedAt)}</div>
+      </div>
+    </div>
+  </a>`;
+}
+
+function listCard(v, cls = 'result') {
+  return `<a class="${cls}" href="#/watch/${esc(v.id)}">
+    <div class="thumb"><img src="${esc(v.thumb)}" alt="" loading="lazy"><span class="dur">${duration(v.duration)}</span></div>
+    <div class="lines">
+      <h3 class="title">${esc(v.title)}</h3>
+      ${cls === 'result'
+        ? `<div class="sub">${views(v.views)} • ${ago(v.publishedAt)}</div>
+           <div class="sub chan-row" data-channel="${esc(v.channelId)}">${avatarImg(v.channelThumb, 'chan small')}${esc(v.channelTitle)}</div>
+           <div class="sub snippet">${esc(v.description.split('\n')[0])}</div>`
+        : `<div class="sub" data-channel="${esc(v.channelId)}">${esc(v.channelTitle)}</div>
+           <div class="sub">${views(v.views)} • ${ago(v.publishedAt)}</div>`}
+    </div>
+  </a>`;
+}
+
+// Clicking a channel name or avatar inside a card opens the channel page.
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-channel]');
+  if (!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  location.hash = `#/channel/${el.dataset.channel}`;
+}, true);
+
+// ---- Views ----------------------------------------------------------------
+
+let currentCategory = null;
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('current', v.id === `view-${name}`));
+  document.querySelectorAll('.side-item').forEach((a) => a.classList.toggle('active', a.dataset.route === name));
+  document.body.classList.toggle('watching', name === 'watch');
+  $('content').scrollTop = 0;
+  if (name !== 'watch') stopPlayer();
+}
+
+async function renderHome() {
+  showView('home');
+  const cats = await api.categories();
+  if (currentCategory && !cats.includes(currentCategory)) currentCategory = null;
+  $('chips').innerHTML = ['All', ...cats]
+    .map((c) => `<button class="chip${(c === 'All' ? !currentCategory : c === currentCategory) ? ' active' : ''}" data-cat="${esc(c)}">${esc(c)}</button>`)
+    .join('');
+  const vids = await api.feed(currentCategory);
+  if (vids.length) {
+    $('grid').innerHTML = vids.map((v) => gridCard(v)).join('');
+    $('empty').hidden = true;
+  } else {
+    $('grid').innerHTML = Array.from({ length: 12 }, () => '<div class="card skeleton"><div class="thumb"></div><div class="meta"><div class="chan"></div><div class="lines"><div class="line"></div><div class="line short"></div></div></div></div>').join('');
+    $('empty').hidden = false;
+  }
+}
+
+$('chips').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  currentCategory = b.dataset.cat === 'All' ? null : b.dataset.cat;
+  renderHome();
+});
+
+async function renderSearch(q) {
+  showView('search');
+  $('search-input').value = q;
+  const vids = await api.search(q);
+  $('results').innerHTML = vids.length
+    ? vids.map((v) => listCard(v)).join('')
+    : '<p class="no-results">No results found<br><span>Try different keywords</span></p>';
+}
+
+async function renderChannel(id) {
+  showView('channel');
+  const channels = await api.channels();
+  const c = channels.find((x) => x.id === id);
+  if (!c) return go('#/');
+  const vids = await api.channelVideos(id);
+  $('channel-head').innerHTML = `${avatarImg(c.thumb, 'chan big')}
+    <div><h1>${esc(c.title)}</h1><div class="sub">${esc(c.handle)}${c.subscribers ? ` • ${compact(c.subscribers)} subscribers` : ''} • ${vids.length} videos</div>
+    <button class="subscribed">Subscribed</button></div>`;
+  $('channel-grid').innerHTML = vids.map((v) => gridCard(v, { showChannel: false })).join('');
+}
+
+async function renderSubscriptions() {
+  showView('subscriptions');
+  const channels = await api.channels();
+  $('sub-row').innerHTML = channels
+    .map((c) => `<a class="sub-chan" href="#/channel/${esc(c.id)}">${avatarImg(c.thumb, 'chan big')}<span>${esc(c.title)}</span></a>`)
+    .join('');
+  const all = (await Promise.all(channels.map((c) => api.channelVideos(c.id)))).flat();
+  all.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  $('sub-grid').innerHTML = all.slice(0, 60).map((v) => gridCard(v)).join('');
+}
+
+// ---- Watch page and player ------------------------------------------------
+
+let playing = null;
+
+async function renderWatch(id) {
+  const v = await api.video(id);
+  if (!v) return go('#/'); // not approved, hidden, or removed
+  showView('watch');
+  playing = v;
+  $('endscreen').hidden = true;
+  const params = new URLSearchParams({ autoplay: '1', rel: '0', playsinline: '1', iv_load_policy: '3', enablejsapi: '1', modestbranding: '1', origin: location.origin });
+  $('player').src = `${EMBED}${encodeURIComponent(v.id)}?${params}`;
+
+  $('watch-title').textContent = v.title;
+  const channels = await api.channels();
+  const c = channels.find((x) => x.id === v.channelId) || {};
+  $('watch-channel').innerHTML = `<a class="chan-row" href="#/channel/${esc(v.channelId)}">${avatarImg(v.channelThumb)}<div><div class="name">${esc(v.channelTitle)}</div>${c.subscribers ? `<div class="sub">${compact(c.subscribers)} subscribers</div>` : ''}</div></a>
+    <button class="subscribed">Subscribed</button>
+    ${parentOpen ? `<button class="btn-hide" id="hide-this">Hide this video</button>` : ''}`;
+  const hideBtn = $('hide-this');
+  if (hideBtn) hideBtn.addEventListener('click', async () => {
+    await api.parent.hideVideo(v.id);
+    go('#/');
+  });
+
+  const desc = v.description.trim();
+  $('description').innerHTML = `<div class="desc-meta">${Number(v.views).toLocaleString()} views • ${ago(v.publishedAt)}</div>
+    <div class="desc-text collapsed" id="desc-text">${esc(desc)}</div>
+    ${desc.length > 200 || desc.split('\n').length > 3 ? '<button class="more" id="desc-more">...more</button>' : ''}`;
+  const more = $('desc-more');
+  if (more) more.addEventListener('click', () => {
+    $('desc-text').classList.remove('collapsed');
+    more.remove();
+  });
+
+  const next = await api.upNext(v.id);
+  $('up-next').innerHTML = next.map((x) => listCard(x, 'compact')).join('');
+  $('endscreen-grid').innerHTML = next.slice(0, 6).map((x) => `<a class="end-card" href="#/watch/${esc(x.id)}"><img src="${esc(x.thumb)}" alt=""><span>${esc(x.title)}</span></a>`).join('');
+}
+
+function stopPlayer() {
+  if ($('player').src) $('player').src = 'about:blank';
+  playing = null;
+}
+
+// Listen to the embedded player so our own end screen (approved videos only)
+// covers YouTube's when a video finishes. Nothing autoplays.
+$('player').addEventListener('load', () => {
+  const frame = $('player').contentWindow;
+  if (frame && playing) frame.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), 'https://www.youtube-nocookie.com');
+});
+
+window.addEventListener('message', (e) => {
+  if (e.origin !== 'https://www.youtube-nocookie.com') return;
+  let data;
+  try {
+    data = JSON.parse(e.data);
+  } catch {
+    return;
+  }
+  // If the player switches video by itself (e.g. a click on YouTube's own
+  // suggestions), follow it only when that video is approved.
+  const newId = data?.info?.videoData?.video_id;
+  if (playing && newId && newId !== playing.id) {
+    const wanted = newId;
+    api.video(wanted).then((v) => (v ? go(`#/watch/${wanted}`) : playing && renderWatch(playing.id)));
+    return;
+  }
+  const state = data?.info?.playerState ?? (data?.event === 'onStateChange' ? data.info : undefined);
+  if (state === 0) $('endscreen').hidden = false;
+  if (state === 1) $('endscreen').hidden = true;
+});
+
+$('replay').addEventListener('click', () => {
+  if (playing) renderWatch(playing.id);
+});
+
+// ---- Routing --------------------------------------------------------------
+
+function go(hash) {
+  if (location.hash === hash) route();
+  else location.hash = hash;
+}
+
+function route() {
+  const [, view, ...rest] = (location.hash || '#/').split('/');
+  const arg = decodeURIComponent(rest.join('/'));
+  if (view === 'watch') return renderWatch(arg);
+  if (view === 'channel') return renderChannel(arg);
+  if (view === 'search') return renderSearch(arg);
+  if (view === 'subscriptions') return renderSubscriptions();
+  if (view === 'you') return showView('you');
+  return renderHome();
+}
+
+window.addEventListener('hashchange', route);
 $('menu-btn').addEventListener('click', () => document.body.classList.toggle('mini'));
-$('logo').addEventListener('click', (e) => e.preventDefault());
-$('search-form').addEventListener('submit', (e) => e.preventDefault());
+$('logo').addEventListener('click', (e) => {
+  e.preventDefault();
+  currentCategory = null;
+  go('#/');
+});
+$('search-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = $('search-input').value.trim();
+  if (q) go(`#/search/${encodeURIComponent(q)}`);
+});
+// Mouse back/forward buttons and Alt+arrows, like a browser.
+window.addEventListener('mouseup', (e) => {
+  if (e.button === 3) history.back();
+  if (e.button === 4) history.forward();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.altKey && e.key === 'ArrowLeft') history.back();
+  if (e.altKey && e.key === 'ArrowRight') history.forward();
+});
+
+api.onLibraryUpdated(() => {
+  // Refresh lists in place, but never interrupt a video that's playing.
+  if (!document.body.classList.contains('watching')) route();
+  if (parentOpen) renderParent();
+});
 
 // ---- Parent area (hidden entry: Ctrl+Shift+P, or hold the avatar 3 s) -----
+
+let parentOpen = false;
 
 function openPinPrompt() {
   $('pin-entry').value = '';
@@ -51,10 +285,10 @@ document.addEventListener('keydown', (e) => {
 
 let holdTimer = null;
 const avatar = $('avatar');
-const startHold = () => { holdTimer = setTimeout(openPinPrompt, 3000); };
-const cancelHold = () => clearTimeout(holdTimer);
-avatar.addEventListener('pointerdown', startHold);
-['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => avatar.addEventListener(ev, cancelHold));
+avatar.addEventListener('pointerdown', () => {
+  holdTimer = setTimeout(openPinPrompt, 3000);
+});
+['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => avatar.addEventListener(ev, () => clearTimeout(holdTimer)));
 
 $('pin-cancel').addEventListener('click', () => $('pin-dialog').close());
 $('pin-form').addEventListener('submit', async (e) => {
@@ -65,22 +299,142 @@ $('pin-form').addEventListener('submit', async (e) => {
     return;
   }
   $('pin-dialog').close();
-  $('parent-key').value = '';
-  setMsg('parent-key-msg', '');
-  $('parent-dialog').showModal();
+  openParent();
 });
 
-$('parent-key-save').addEventListener('click', async () => {
+function openParent() {
+  parentOpen = true;
+  ['find-input', 'hide-input', 'parent-key'].forEach((id) => ($(id).value = ''));
+  ['find-msg', 'hide-msg', 'sync-msg', 'parent-key-msg'].forEach((id) => setMsg(id, ''));
+  $('found').innerHTML = '';
+  $('parent-dialog').showModal();
+  renderParent();
+  $('find-input').focus();
+}
+
+function closeParent() {
+  parentOpen = false;
+  api.lockParent();
+  if ($('parent-dialog').open) $('parent-dialog').close();
+  route();
+}
+
+$('parent-close').addEventListener('click', closeParent);
+$('parent-dialog').addEventListener('cancel', (e) => {
+  e.preventDefault();
+  closeParent();
+});
+
+let categoryList = [];
+
+function categoryPicker(selected, name) {
+  return `<div class="cat-pick">${categoryList
+    .map((c) => `<label class="cat"><input type="checkbox" name="${esc(name)}" value="${esc(c)}"${selected.includes(c) ? ' checked' : ''}><span>${esc(c)}</span></label>`)
+    .join('')}</div>`;
+}
+
+async function renderParent() {
+  const info = await api.parent.info();
+  if (!info.ok) return closeParent();
+  categoryList = info.categories;
+  $('approved-count').textContent = info.channels.length ? `(${info.channels.length})` : '';
+  $('approved').innerHTML = info.channels.length
+    ? info.channels
+        .map((c) => `<div class="ch-row" data-id="${esc(c.id)}">
+          ${avatarImg(c.thumb)}
+          <div class="grow"><div class="name">${esc(c.title)}</div><div class="sub">${c.videoCount} videos</div>${categoryPicker(c.categories || [], 'cat-' + c.id)}</div>
+          <button class="btn-text danger" data-remove="${esc(c.id)}">Remove</button>
+        </div>`)
+        .join('')
+    : '<p class="hint">No channels yet. Search for one above.</p>';
+  $('hidden-list').innerHTML = info.hidden.map((id) => `<div class="row center"><span class="grow mono">${esc(id)}</span><button class="btn-text" data-unhide="${esc(id)}">Unhide</button></div>`).join('');
+  $('sync-info').textContent = info.syncing ? 'Checking for new videos…' : info.lastSync ? `Last checked ${ago(new Date(info.lastSync).toISOString())}. The app also checks by itself every 6 hours.` : 'Not checked yet.';
+}
+
+$('find-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const q = $('find-input').value.trim();
+  if (!q) return;
+  setMsg('find-msg', 'Searching…');
+  $('found').innerHTML = '';
+  const res = await api.parent.findChannel(q);
+  if (!res.ok) return setMsg('find-msg', res.message, false);
+  if (!res.results.length) return setMsg('find-msg', 'No channels found. Try another name, or paste the channel link.', false);
+  setMsg('find-msg', 'Tick the categories that fit, then press Add.');
+  $('found').innerHTML = res.results
+    .map((c) => `<div class="ch-row" data-id="${esc(c.id)}">
+      ${avatarImg(c.thumb)}
+      <div class="grow"><div class="name">${esc(c.title)}</div><div class="sub">${esc(c.handle)}${c.subscribers ? ` • ${compact(c.subscribers)} subscribers` : ''}</div>
+      ${c.approved ? '' : categoryPicker([], 'new-' + c.id)}</div>
+      ${c.approved ? '<span class="sub">Already approved</span>' : `<button class="btn-primary" data-add="${esc(c.id)}">Add</button>`}
+    </div>`)
+    .join('');
+});
+
+$('parent-dialog').addEventListener('click', async (e) => {
+  const add = e.target.closest('[data-add]');
+  const remove = e.target.closest('[data-remove]');
+  const unhide = e.target.closest('[data-unhide]');
+  if (add) {
+    const id = add.dataset.add;
+    const cats = [...document.querySelectorAll(`input[name="new-${CSS.escape(id)}"]:checked`)].map((i) => i.value);
+    add.disabled = true;
+    add.textContent = 'Adding…';
+    const res = await api.parent.addChannel(id, cats);
+    if (!res.ok) {
+      add.disabled = false;
+      add.textContent = 'Add';
+      return setMsg('find-msg', res.message, false);
+    }
+    add.closest('.ch-row').remove();
+    setMsg('find-msg', `Added, with ${res.videoCount} videos.`, true);
+    renderParent();
+  }
+  if (remove) {
+    const row = remove.closest('.ch-row');
+    if (!confirm(`Remove ${row.querySelector('.name').textContent}? Its videos will disappear from the app.`)) return;
+    await api.parent.removeChannel(remove.dataset.remove);
+    renderParent();
+  }
+  if (unhide) {
+    await api.parent.unhideVideo(unhide.dataset.unhide);
+    renderParent();
+  }
+});
+
+$('approved').addEventListener('change', async (e) => {
+  const row = e.target.closest('.ch-row');
+  if (!row) return;
+  const cats = [...row.querySelectorAll('input:checked')].map((i) => i.value);
+  await api.parent.setCategories(row.dataset.id, cats);
+});
+
+$('hide-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const res = await api.parent.hideVideo($('hide-input').value);
+  setMsg('hide-msg', res.ok ? 'Hidden.' : res.message, res.ok);
+  if (res.ok) {
+    $('hide-input').value = '';
+    renderParent();
+  }
+});
+
+$('sync-btn').addEventListener('click', async () => {
+  $('sync-btn').disabled = true;
+  setMsg('sync-msg', 'Checking every channel for new videos…');
+  const res = await api.parent.sync();
+  $('sync-btn').disabled = false;
+  if (!res.ok) return setMsg('sync-msg', res.message, false);
+  setMsg('sync-msg', res.errors?.length ? `Some channels could not be checked: ${res.errors.join('; ')}` : 'Up to date.', !res.errors?.length);
+  renderParent();
+});
+
+$('key-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
   setMsg('parent-key-msg', 'Checking…');
   const res = await api.setApiKey($('parent-key').value);
   setMsg('parent-key-msg', res.ok ? 'Saved. The new key works.' : res.message, res.ok);
 });
-
-$('parent-close').addEventListener('click', () => {
-  api.lockParent();
-  $('parent-dialog').close();
-});
-$('parent-dialog').addEventListener('close', () => api.lockParent());
 
 function setMsg(id, text, ok) {
   const el = $(id);
@@ -120,6 +474,7 @@ $('pin-save').addEventListener('click', async () => {
     $('pin-setup-error').textContent = res.message;
     return;
   }
+  sessionPin = p1;
   showStep(2);
 });
 
@@ -137,17 +492,23 @@ $('key-check').addEventListener('click', async () => {
   setTimeout(() => showStep(3), 700);
 });
 
+// The PIN typed during setup, so the parent area can open straight after.
+let sessionPin = null;
+
 $('finish').addEventListener('click', async () => {
   const res = await api.finishSetup();
-  if (res.ok) $('wizard').hidden = true;
+  if (!res.ok) return;
+  $('wizard').hidden = true;
+  if (sessionPin && (await api.checkPin(sessionPin)).ok) openParent();
+  else openPinPrompt();
+  sessionPin = null;
 });
 
 // ---- Start ----------------------------------------------------------------
 
 (async function init() {
-  renderChips();
-  renderPlaceholderGrid();
   const state = await api.state();
+  route();
   if (!state.setupDone) {
     $('wizard').hidden = false;
     // Resume where the parent left off if the app was closed mid-setup.

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
+        content="default-src 'self'; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
   <title>YouTube</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,7 +13,7 @@
       <button class="icon-btn" id="menu-btn" aria-label="Menu">
         <svg viewBox="0 0 24 24"><path d="M21 6H3V5h18v1zm0 5H3v1h18v-1zm0 6H3v1h18v-1z"/></svg>
       </button>
-      <a class="logo" href="#" id="logo" aria-label="YouTube Home">
+      <a class="logo" href="#/" id="logo" aria-label="YouTube Home">
         <svg class="logo-mark" viewBox="0 0 28 20"><path fill="#FF0033" d="M27.4 3.1A3.5 3.5 0 0 0 25 .6C22.8 0 14 0 14 0S5.2 0 3 .6A3.5 3.5 0 0 0 .6 3.1C0 5.3 0 10 0 10s0 4.7.6 6.9A3.5 3.5 0 0 0 3 19.4c2.2.6 11 .6 11 .6s8.8 0 11-.6a3.5 3.5 0 0 0 2.4-2.5c.6-2.2.6-6.9.6-6.9s0-4.7-.6-6.9z"/><path fill="#fff" d="M11.2 14.3 18.5 10l-7.3-4.3z"/></svg>
         <span class="logo-word">YouTube</span>
       </a>
@@ -30,22 +30,72 @@
   </header>
 
   <nav class="sidebar" id="sidebar">
-    <a class="side-item active" href="#">
+    <a class="side-item" href="#/" data-route="home">
       <svg viewBox="0 0 24 24"><path d="M4 21V10.08l8-6.96 8 6.96V21h-6v-6h-4v6H4z"/></svg><span>Home</span>
     </a>
-    <a class="side-item" href="#">
+    <a class="side-item" href="#/subscriptions" data-route="subscriptions">
       <svg viewBox="0 0 24 24"><path d="M20 7H4V6h16v1zm2 2v12H2V9h20zm-7 6-5-3v6l5-3zm2-12H7v1h10V3z"/></svg><span>Subscriptions</span>
     </a>
     <hr>
-    <a class="side-item" href="#">
+    <a class="side-item" href="#/you" data-route="you">
       <svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm0 9c-4.42 0-8 2.24-8 5v3h16v-3c0-2.76-3.58-5-8-5zm7 7H5v-2c0-2.17 3.13-4 7-4s7 1.83 7 4v2z"/></svg><span>You</span>
     </a>
   </nav>
 
-  <main class="content">
-    <div class="chips" id="chips"></div>
-    <div class="grid" id="grid"></div>
-    <p class="empty" id="empty" hidden><span>No videos yet. Ask a grown-up to add some channels.</span></p>
+  <main class="content" id="content">
+    <!-- Home -->
+    <section class="view" id="view-home">
+      <div class="chips" id="chips"></div>
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" hidden><span>No videos yet. Ask a grown-up to add some channels.</span></p>
+    </section>
+
+    <!-- Search results -->
+    <section class="view" id="view-search">
+      <div class="results" id="results"></div>
+    </section>
+
+    <!-- Channel page -->
+    <section class="view" id="view-channel">
+      <div class="channel-head" id="channel-head"></div>
+      <div class="tabs"><span class="tab active">Videos</span></div>
+      <div class="grid" id="channel-grid"></div>
+    </section>
+
+    <!-- Subscriptions -->
+    <section class="view" id="view-subscriptions">
+      <h2 class="page-title">Subscriptions</h2>
+      <div class="sub-row" id="sub-row"></div>
+      <h3 class="shelf-title">Latest</h3>
+      <div class="grid" id="sub-grid"></div>
+    </section>
+
+    <!-- Watch page -->
+    <section class="view" id="view-watch">
+      <div class="watch">
+        <div class="watch-main">
+          <div class="player-wrap" id="player-wrap">
+            <iframe id="player" title="Video player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            <div class="endscreen" id="endscreen" hidden>
+              <div class="endscreen-grid" id="endscreen-grid"></div>
+              <button class="replay" id="replay">
+                <svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>Replay
+              </button>
+            </div>
+          </div>
+          <h1 class="watch-title" id="watch-title"></h1>
+          <div class="watch-channel" id="watch-channel"></div>
+          <div class="description" id="description"></div>
+        </div>
+        <aside class="up-next" id="up-next"></aside>
+      </div>
+    </section>
+
+    <!-- You -->
+    <section class="view" id="view-you">
+      <h2 class="page-title">You</h2>
+      <p class="muted">Nothing here yet.</p>
+    </section>
   </main>
 
   <!-- Parent PIN prompt -->
@@ -62,19 +112,47 @@
     </form>
   </dialog>
 
-  <!-- Parent area (phase 1: change API key; channels come in phase 2) -->
-  <dialog id="parent-dialog" class="dialog wide">
-    <h2>Parent area</h2>
-    <p>Adding and removing channels comes in the next version.</p>
-    <h3>YouTube API key</h3>
-    <div class="row">
-      <input id="parent-key" type="text" placeholder="Paste a new API key" autocomplete="off" spellcheck="false">
-      <button class="btn-primary" id="parent-key-save">Save</button>
-    </div>
-    <p class="msg" id="parent-key-msg"></p>
-    <div class="actions">
+  <!-- Parent area -->
+  <dialog id="parent-dialog" class="dialog parent">
+    <div class="parent-head">
+      <h2>Parent area</h2>
       <button class="btn-text" id="parent-close">Close</button>
     </div>
+
+    <h3>Add a channel</h3>
+    <p class="hint">Type a channel name (for example "Tom and Jerry"), or paste a channel link or @handle.</p>
+    <form class="row" id="find-form">
+      <input id="find-input" type="text" placeholder="Channel name, link or @handle" autocomplete="off" spellcheck="false">
+      <button class="btn-primary" id="find-btn">Search</button>
+    </form>
+    <p class="msg" id="find-msg"></p>
+    <div class="found" id="found"></div>
+
+    <h3>Approved channels <span class="count" id="approved-count"></span></h3>
+    <div class="approved" id="approved"></div>
+
+    <h3>Hidden videos</h3>
+    <p class="hint">To hide one video from an approved channel, paste its link. You can also hide a video from its watch page while the parent area is open.</p>
+    <form class="row" id="hide-form">
+      <input id="hide-input" type="text" placeholder="Video link" autocomplete="off" spellcheck="false">
+      <button class="btn-primary">Hide</button>
+    </form>
+    <p class="msg" id="hide-msg"></p>
+    <div class="hidden-list" id="hidden-list"></div>
+
+    <h3>Updates</h3>
+    <div class="row center">
+      <span id="sync-info" class="grow"></span>
+      <button class="btn-primary" id="sync-btn">Check for new videos</button>
+    </div>
+    <p class="msg" id="sync-msg"></p>
+
+    <h3>YouTube API key</h3>
+    <form class="row" id="key-form">
+      <input id="parent-key" type="text" placeholder="Paste a new API key" autocomplete="off" spellcheck="false">
+      <button class="btn-primary">Save</button>
+    </form>
+    <p class="msg" id="parent-key-msg"></p>
   </dialog>
 
   <!-- First-run setup wizard -->
@@ -128,7 +206,7 @@
 
       <section data-step="3">
         <h1>All set</h1>
-        <p>Next, you'll add your approved channels from the parent area. That arrives in the next version.</p>
+        <p>Next, add your approved channels in the parent area. It opens as soon as you press Start.</p>
         <p><strong>To open the parent area later:</strong> press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>, or press and hold the round letter in the top-right corner for 3 seconds.</p>
         <div class="actions"><button class="btn-primary" id="finish">Start</button></div>
       </section>
