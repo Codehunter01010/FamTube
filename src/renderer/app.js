@@ -1,11 +1,9 @@
 const api = window.safetube;
 const $ = (id) => document.getElementById(id);
 
-// The player normally runs on YouTube's privacy-enhanced domain. With the
-// parent's "YouTube Premium" switch on it uses youtube.com instead, so the
-// Premium account signed in to this browser removes the ads.
-const PLAYER_HOSTS = ['https://www.youtube-nocookie.com', 'https://www.youtube.com'];
-let playerHost = PLAYER_HOSTS[0];
+// The player always runs on youtube.com, so a Premium account signed in to
+// this browser removes the ads without any switch.
+const playerHost = 'https://www.youtube.com';
 
 // ---- Formatting -----------------------------------------------------------
 
@@ -160,7 +158,6 @@ async function renderWatch(id) {
   playing = v;
   $('endscreen').hidden = true;
   const params = new URLSearchParams({ autoplay: '1', rel: '0', playsinline: '1', iv_load_policy: '3', enablejsapi: '1', modestbranding: '1', origin: location.origin });
-  playerHost = (await api.settings()).premium ? PLAYER_HOSTS[1] : PLAYER_HOSTS[0];
   $('player').src = `${playerHost}/embed/${encodeURIComponent(v.id)}?${params}`;
 
   $('watch-title').textContent = v.title;
@@ -325,7 +322,7 @@ $('pin-form').addEventListener('submit', async (e) => {
 function openParent(target = 'add') {
   parentOpen = true;
   ['find-input', 'hide-input', 'parent-key'].forEach((id) => ($(id).value = ''));
-  ['find-msg', 'hide-msg', 'sync-msg', 'premium-msg', 'parent-key-msg'].forEach((id) => setMsg(id, ''));
+  ['find-msg', 'hide-msg', 'sync-msg', 'parent-key-msg'].forEach((id) => setMsg(id, ''));
   $('found').innerHTML = '';
   $('parent-dialog').showModal();
   renderParent();
@@ -380,7 +377,6 @@ async function renderParent() {
         .join('')
     : '<p class="hint">No channels yet. Search for one above.</p>';
   $('hidden-list').innerHTML = info.hidden.map((id) => `<div class="row center"><span class="grow mono">${esc(id)}</span><button class="btn-text" data-unhide="${esc(id)}">Unhide</button></div>`).join('');
-  $('premium').checked = !!info.premium;
   $('sync-info').textContent = info.syncing ? 'Checking for new videos…' : info.lastSync ? `Last checked ${ago(new Date(info.lastSync).toISOString())}. The app also checks by itself every 6 hours.` : 'Not checked yet.';
 }
 
@@ -460,11 +456,6 @@ $('sync-btn').addEventListener('click', async () => {
   if (!res.ok) return setMsg('sync-msg', res.message, false);
   setMsg('sync-msg', res.errors?.length ? `Some channels could not be checked: ${res.errors.join('; ')}` : 'Up to date.', !res.errors?.length);
   renderParent();
-});
-
-$('premium').addEventListener('change', async () => {
-  const res = await api.parent.setPremium($('premium').checked);
-  setMsg('premium-msg', res.ok ? 'Saved.' : res.message, res.ok);
 });
 
 $('key-form').addEventListener('submit', async (e) => {
