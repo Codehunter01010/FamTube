@@ -301,6 +301,8 @@ $('avatar').addEventListener('click', (e) => {
 });
 $('menu-add').addEventListener('click', () => openPinPrompt('add'));
 $('menu-settings').addEventListener('click', () => openPinPrompt('settings'));
+$('side-add').addEventListener('click', () => openPinPrompt('add'));
+$('side-settings').addEventListener('click', () => openPinPrompt('settings'));
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#account-menu')) closeAccountMenu();
 });
