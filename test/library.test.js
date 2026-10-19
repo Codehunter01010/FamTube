@@ -4,6 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { Library } = require('../src/library');
+const { fileStorage } = require('../src/file-storage');
 const yt = require('../src/youtube-api');
 
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'safetube-lib-'));
@@ -11,7 +12,7 @@ const chan = (id, title) => ({ id, title, thumb: '', uploads: 'UU' + id.slice(2)
 const vid = (id, channelId, extra = {}) => ({ id, channelId, title: 'Video ' + id, description: '', thumb: '', duration: 600, views: 10, publishedAt: '2026-01-0' + (id.length % 9 + 1) + 'T00:00:00Z', ...extra });
 
 function setup() {
-  const lib = new Library(tmp());
+  const lib = new Library(fileStorage(path.join(tmp(), 'library.json')));
   lib.addChannel(chan('UCaaaaaaaaaaaaaaaaaaaaaa', 'Animals'), ['Animals']);
   lib.addChannel(chan('UCbbbbbbbbbbbbbbbbbbbbbb', 'Soccer'), ['Soccer']);
   lib.setChannelVideos('UCaaaaaaaaaaaaaaaaaaaaaa', [vid('lion0000001', 'UCaaaaaaaaaaaaaaaaaaaaaa', { title: 'Lions hunting' }), vid('tiger000001', 'UCaaaaaaaaaaaaaaaaaaaaaa')]);
@@ -69,9 +70,9 @@ test('search is local and matches words in any order', () => {
 
 test('library persists to disk', () => {
   const dir = tmp();
-  const a = new Library(dir);
+  const a = new Library(fileStorage(path.join(dir, 'library.json')));
   a.addChannel(chan('UCaaaaaaaaaaaaaaaaaaaaaa', 'Animals'), ['Animals', 'NotACategory']);
-  const b = new Library(dir);
+  const b = new Library(fileStorage(path.join(dir, 'library.json')));
   assert.deepStrictEqual(b.channel('UCaaaaaaaaaaaaaaaaaaaaaa').categories, ['Animals']);
 });
 

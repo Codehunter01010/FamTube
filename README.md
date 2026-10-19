@@ -1,20 +1,27 @@
-# Family YouTube (SafeTube)
+# Family YouTube
 
-A Windows desktop app that looks like YouTube but only shows channels a parent approved.
-Everything runs on the PC; there is no server.
+A YouTube-style app that only shows channels a parent approved. No Shorts,
+no recommendations from YouTube, and nothing plays by itself.
 
-## For developers
+It comes in two forms that share the same interface and allowlist code:
 
-- `npm install` then `npm start` to run it.
-- `npm test` runs the unit tests.
-- `npm run dist:win` builds `dist/YouTube-Family-Setup-<version>.exe`
-  (on Linux this needs wine with 32-bit support).
+- **Web app** (`npm run build:web` → `web/`), published to GitHub Pages on
+  every push to `main`. Settings, PIN and API key live only in the browser
+  that uses it (IndexedDB), never on the website.
+- **Windows desktop app** (Electron, `npm run dist:win`).
 
 ## Layout
 
-- `src/main.js`: Electron main process, window lock-in, settings IPC.
-- `src/store.js`: local settings (hashed parent PIN, API key).
+- `src/library.js`: the allowlist and cached videos. Everything the child
+  sees comes through here.
 - `src/youtube-api.js`: YouTube Data API v3 calls.
-- `src/renderer/`: the YouTube-style interface and first-run wizard.
+- `src/renderer/`: the interface (shared by web and desktop).
+- `src/web/backend.js`: browser backend for the web app.
+- `src/main.js`, `src/preload.js`, `src/store.js`: desktop backend.
 
-Settings live in `%APPDATA%\YouTube\settings.json`.
+## Develop
+
+- `npm install`
+- `npm test` runs the allowlist tests.
+- `npm run build:web`, then serve `web/` with any static server.
+- `npm start` runs the desktop app.

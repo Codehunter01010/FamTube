@@ -4,6 +4,7 @@ const http = require('http');
 const path = require('path');
 const { Store } = require('./store');
 const { Library, CATEGORIES } = require('./library');
+const { fileStorage } = require('./file-storage');
 const yt = require('./youtube-api');
 
 // Links the parent may open in their normal browser. Nothing else is ever
@@ -283,7 +284,7 @@ if (!app.requestSingleInstanceLock()) {
   });
   app.whenReady().then(async () => {
     store = new Store(app.getPath('userData'));
-    library = new Library(app.getPath('userData'));
+    library = new Library(fileStorage(path.join(app.getPath('userData'), 'library.json')));
     await serveApp();
     createWindow();
     const due = () => store.data.setupDone && Date.now() - library.data.lastSync > SYNC_EVERY_MS;

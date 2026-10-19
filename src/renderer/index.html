@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
+        content="default-src 'self'; connect-src 'self' https://www.googleapis.com; img-src 'self' data: https://i.ytimg.com https://yt3.ggpht.com https://yt3.googleusercontent.com; style-src 'self'; script-src 'self'; font-src 'self'; frame-src https://www.youtube-nocookie.com">
   <title>YouTube</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -75,7 +75,7 @@
       <div class="watch">
         <div class="watch-main">
           <div class="player-wrap" id="player-wrap">
-            <iframe id="player" title="Video player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            <iframe id="player" title="Video player" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
             <div class="endscreen" id="endscreen" hidden>
               <div class="endscreen-grid" id="endscreen-grid"></div>
               <button class="replay" id="replay">
@@ -207,7 +207,7 @@
       <section data-step="3">
         <h1>All set</h1>
         <p>Next, add your approved channels in the parent area. It opens as soon as you press Start.</p>
-        <p><strong>To open the parent area later:</strong> press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>, or press and hold the round letter in the top-right corner for 3 seconds.</p>
+        <p><strong>To open the parent area later:</strong> press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd>, or press and hold the round letter in the top-right corner for 3 seconds.</p>
         <div class="actions"><button class="btn-primary" id="finish">Start</button></div>
       </section>
     </div>

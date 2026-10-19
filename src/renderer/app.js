@@ -268,7 +268,7 @@ api.onLibraryUpdated(() => {
   if (parentOpen) renderParent();
 });
 
-// ---- Parent area (hidden entry: Ctrl+Shift+P, or hold the avatar 3 s) -----
+// ---- Parent area (hidden entry: Ctrl+Shift+Y, or hold the avatar 3 s) -----
 
 let parentOpen = false;
 
@@ -280,7 +280,7 @@ function openPinPrompt() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p' && $('wizard').hidden) openPinPrompt();
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'y' && $('wizard').hidden) openPinPrompt();
 });
 
 let holdTimer = null;

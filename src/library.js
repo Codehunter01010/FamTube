@@ -1,28 +1,20 @@
 // The allowlist and the cached videos of approved channels.
 // Every video the app shows or plays comes out of this class, so the rule
 // "only approved channels, never hidden videos, never Shorts" lives here.
-const fs = require('fs');
-const path = require('path');
 const { isShort } = require('./youtube-api');
 
 const CATEGORIES = ['Soccer', 'Sports', 'Animals', 'Cartoons', 'Anime', 'Minecraft', 'Learning', 'Music'];
 
 class Library {
-  constructor(dir) {
-    this.file = path.join(dir, 'library.json');
-    this.data = { channels: [], hidden: [], videos: {}, lastSync: 0 };
-    try {
-      this.data = { ...this.data, ...JSON.parse(fs.readFileSync(this.file, 'utf8')) };
-    } catch {
-      // First run.
-    }
+  // `storage` is { load() -> object|null, save(object) }: a file on the
+  // desktop, browser storage in the web app.
+  constructor(storage) {
+    this.storage = storage;
+    this.data = { channels: [], hidden: [], videos: {}, lastSync: 0, ...(storage.load() || {}) };
   }
 
   save() {
-    fs.mkdirSync(path.dirname(this.file), { recursive: true });
-    const tmp = this.file + '.tmp';
-    fs.writeFileSync(tmp, JSON.stringify(this.data));
-    fs.renameSync(tmp, this.file);
+    this.storage.save(this.data);
   }
 
   // ---- Parent actions ----
