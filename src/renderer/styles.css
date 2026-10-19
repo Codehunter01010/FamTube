@@ -130,7 +130,7 @@ body.mini .empty { left: 72px; }
 .wizard section.current { display: block; }
 .wizard-steps { display: flex; gap: 6px; margin-bottom: 24px; }
 .wizard-steps span { height: 4px; flex: 1; border-radius: 2px; background: var(--skeleton); }
-.wizard-steps span.done { background: #FFC83D; }
+.wizard-steps span.done { background: #E53935; }
 .guide { padding-left: 20px; }
 .guide li { margin-bottom: 14px; font-size: 15px; }
 kbd { border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font: 13px Roboto, Arial, sans-serif; }
