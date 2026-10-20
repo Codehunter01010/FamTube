@@ -180,6 +180,15 @@
     <p class="hint">Videos play without ads when this browser is signed in to your YouTube Premium account. You only need to sign in once; it stays signed in.</p>
     <div class="row"><button class="btn-primary" data-open="https://accounts.google.com/ServiceLogin?service=youtube&amp;continue=https%3A%2F%2Fwww.youtube.com%2F">Sign in to YouTube</button></div>
 
+    <h3>Backup</h3>
+    <p class="hint">Save your approved channels to a file, so you can put them back on a new device or after the browser was cleared.</p>
+    <div class="row">
+      <button class="btn-primary" id="export-btn">Download channel list</button>
+      <label class="btn-text" for="import-file">Restore from file</label>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+    <p class="msg" id="backup-msg"></p>
+
     <h3>YouTube API key</h3>
     <form class="row" id="key-form">
       <input id="parent-key" type="text" placeholder="Paste a new API key" autocomplete="off" spellcheck="false">

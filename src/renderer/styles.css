@@ -262,3 +262,4 @@ body.watching .content { left: 0; }
 button.side-item { width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .side-heading { margin: 4px 12px 8px; font-size: 16px; font-weight: 500; }
 body.mini .side-heading { display: none; }
+label.btn-text { display: inline-flex; align-items: center; cursor: pointer; }

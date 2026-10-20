@@ -60,6 +60,19 @@ test('videos that cannot play outside youtube.com stay out after a sync', () => 
   assert.deepStrictEqual(lib.data.hidden, []);
 });
 
+test('a channel list backup restores channels and hidden videos only', () => {
+  const lib = setup();
+  lib.hideVideo('tiger000001');
+  const list = JSON.parse(JSON.stringify(lib.exportList()));
+  const fresh = new Library(fileStorage(path.join(tmp(), 'library.json')));
+  list.channels.push({ id: 'not-a-channel', uploads: 'x' });
+  assert.strictEqual(fresh.importList(list), 2);
+  assert.deepStrictEqual(fresh.channels.map((c) => c.categories), [['Animals'], ['Soccer']]);
+  assert.deepStrictEqual(fresh.data.hidden, ['tiger000001']);
+  assert.strictEqual(fresh.importList(list), 0);
+  assert.throws(() => fresh.importList({}), /not a FamTube channel list/);
+});
+
 test('Shorts never appear even if cached', () => {
   const lib = setup();
   lib.setChannelVideos('UCaaaaaaaaaaaaaaaaaaaaaa', [vid('short000001', 'UCaaaaaaaaaaaaaaaaaaaaaa', { duration: 45 }), vid('short000002', 'UCaaaaaaaaaaaaaaaaaaaaaa', { title: 'Wow #shorts' })]);

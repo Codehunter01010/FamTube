@@ -157,6 +157,7 @@ window.safetube = {
     if (!s.settings.pinHash || !s.settings.apiKey) return { ok: false, message: 'Set a PIN and an API key first.' };
     s.settings.setupDone = true;
     s.saveSettings();
+    restoreFromSite();
     return { ok: true };
   },
   async openGuideLink(url) {
@@ -243,11 +244,42 @@ window.safetube = {
       notify();
     }),
     sync: parentOnly(async () => ({ errors: await syncAll() })),
+    exportList: parentOnly((s) => ({ list: s.library.exportList() })),
+    importList: parentOnly(async (s, text) => {
+      let list;
+      try {
+        list = JSON.parse(text);
+      } catch {
+        throw new Error('This is not a FamTube channel list.');
+      }
+      const added = s.library.importList(list);
+      notify();
+      syncAll();
+      return { added };
+    }),
   },
 };
 
+// If this browser has no channels (new device, or its site data was cleared),
+// load the list saved with the website itself, if there is one.
+async function restoreFromSite() {
+  const s = await ready;
+  if (!s.settings.setupDone || s.library.channels.length) return;
+  try {
+    const res = await fetch('channels.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    if (s.library.importList(await res.json())) {
+      notify();
+      await syncAll();
+    }
+  } catch (err) {
+    console.error('Restoring the channel list failed', err);
+  }
+}
+
 // Check for new videos on start and every 15 minutes once 6 hours have passed.
-ready.then((s) => {
+ready.then(async (s) => {
+  await restoreFromSite();
   const due = () => s.settings.setupDone && Date.now() - s.library.data.lastSync > SYNC_EVERY_MS;
   if (due()) syncAll();
   setInterval(() => due() && syncAll(), 15 * 60 * 1000);

@@ -331,7 +331,7 @@ $('pin-form').addEventListener('submit', async (e) => {
 function openParent(target = 'add') {
   parentOpen = true;
   ['find-input', 'hide-input', 'parent-key'].forEach((id) => ($(id).value = ''));
-  ['find-msg', 'hide-msg', 'sync-msg', 'parent-key-msg'].forEach((id) => setMsg(id, ''));
+  ['find-msg', 'hide-msg', 'sync-msg', 'backup-msg', 'parent-key-msg'].forEach((id) => setMsg(id, ''));
   $('found').innerHTML = '';
   $('parent-dialog').showModal();
   renderParent();
@@ -465,6 +465,25 @@ $('sync-btn').addEventListener('click', async () => {
   if (!res.ok) return setMsg('sync-msg', res.message, false);
   setMsg('sync-msg', res.errors?.length ? `Some channels could not be checked: ${res.errors.join('; ')}` : 'Up to date.', !res.errors?.length);
   renderParent();
+});
+
+$('export-btn').addEventListener('click', async () => {
+  const res = await api.parent.exportList();
+  if (!res.ok) return setMsg('backup-msg', res.message, false);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(res.list, null, 2)], { type: 'application/json' }));
+  a.download = 'famtube-channels.json';
+  a.click();
+  setMsg('backup-msg', `Saved ${res.list.channels.length} channels to famtube-channels.json in your Downloads.`, true);
+});
+
+$('import-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const res = await api.parent.importList(await file.text());
+  setMsg('backup-msg', res.ok ? `Restored ${res.added} channels. Their videos are loading now.` : res.message, res.ok);
+  if (res.ok) renderParent();
 });
 
 $('key-form').addEventListener('submit', async (e) => {

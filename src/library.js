@@ -61,6 +61,34 @@ class Library {
     this.save();
   }
 
+  // The approved list as a small backup: channels with their categories and
+  // the hidden videos. Videos themselves are fetched again after a restore.
+  exportList() {
+    return {
+      famtube: 1,
+      channels: this.data.channels.map(({ id, title, thumb, handle, uploads, subscribers, categories }) => ({ id, title, thumb, handle, uploads, subscribers, categories })),
+      hidden: [...this.data.hidden],
+    };
+  }
+
+  // Adds the channels and hidden videos from a backup; returns how many
+  // channels were new.
+  importList(list) {
+    if (!list || !Array.isArray(list.channels)) throw new Error('This is not a FamTube channel list.');
+    let added = 0;
+    for (const c of list.channels) {
+      if (!/^UC[\w-]{22}$/.test(c?.id || '') || !/^UU[\w-]{22}$/.test(c?.uploads || '') || this.channel(c.id)) continue;
+      const { id, title, thumb, handle, uploads, subscribers } = c;
+      this.data.channels.push({ id, title: String(title || id), thumb: String(thumb || ''), handle: String(handle || ''), uploads, subscribers: Number(subscribers) || 0, categories: (c.categories || []).filter((x) => CATEGORIES.includes(x)), addedAt: Date.now() });
+      added++;
+    }
+    for (const v of list.hidden || []) {
+      if (/^[\w-]{11}$/.test(v) && !this.data.hidden.includes(v)) this.data.hidden.push(v);
+    }
+    this.save();
+    return added;
+  }
+
   // A video whose owner blocks playback outside youtube.com. The player
   // reports it the first time it fails; from then on it is left out.
   markUnplayable(videoId) {

@@ -36,5 +36,7 @@ contextBridge.exposeInMainWorld('safetube', {
     unhideVideo: call('parent:unhide-video'),
     sync: call('parent:sync'),
     setPremium: call('parent:set-premium'),
+    exportList: call('parent:export-list'),
+    importList: call('parent:import-list'),
   },
 });

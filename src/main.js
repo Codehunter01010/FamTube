@@ -281,6 +281,19 @@ ipcMain.handle('parent:unhide-video', parentOnly((id) => {
 }));
 
 ipcMain.handle('parent:sync', parentOnly(async () => ({ errors: await syncAll() })));
+ipcMain.handle('parent:export-list', parentOnly(() => ({ list: library.exportList() })));
+ipcMain.handle('parent:import-list', parentOnly(async (text) => {
+  let list;
+  try {
+    list = JSON.parse(text);
+  } catch {
+    throw new Error('This is not a FamTube channel list.');
+  }
+  const added = library.importList(list);
+  notifyLibraryChanged();
+  syncAll();
+  return { added };
+}));
 
 // ---- Start ----------------------------------------------------------------
 

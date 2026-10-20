@@ -12,6 +12,9 @@ for (const f of ['manifest.webmanifest', 'sw.js', 'register-sw.js', 'icon-192.pn
   fs.copyFileSync(path.join(root, 'src', 'web', f), path.join(out, f));
 }
 
+// The approved channel list saved with the site, restored on a new device.
+if (fs.existsSync(path.join(root, 'channels.json'))) fs.copyFileSync(path.join(root, 'channels.json'), path.join(out, 'channels.json'));
+
 esbuild.buildSync({
   entryPoints: [path.join(root, 'src', 'web', 'backend.js')],
   bundle: true,
