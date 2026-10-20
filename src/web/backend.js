@@ -260,18 +260,29 @@ window.safetube = {
   },
 };
 
-// If this browser has no channels (new device, or its site data was cleared),
-// load the list saved with the website itself, if there is one.
+// The channel list saved with the website itself (channels.json). Each new
+// version of it is added once, so a new device or a cleared browser gets the
+// channels back by itself, and a channel the parent removes stays removed.
 async function restoreFromSite() {
   const s = await ready;
-  if (!s.settings.setupDone || s.library.channels.length) return;
+  if (!s.settings.setupDone || !s.settings.apiKey) return;
   try {
     const res = await fetch('channels.json', { cache: 'no-cache' });
     if (!res.ok) return;
-    if (s.library.importList(await res.json())) {
-      notify();
-      await syncAll();
+    const list = await res.json();
+    if (!list.version || s.settings.siteListVersion === list.version) return;
+    const have = new Set(s.library.channels.flatMap((c) => [c.id, (c.handle || '').toLowerCase()]));
+    const channels = [];
+    for (const entry of list.channels || []) {
+      if (have.has(entry.id) || (entry.handle && have.has(entry.handle.toLowerCase()))) continue;
+      const c = await yt.resolveChannel(entry, s.settings.apiKey);
+      if (c) channels.push({ ...c, categories: entry.categories || [] });
     }
+    s.library.importList({ channels, hidden: list.hidden || [] });
+    s.settings.siteListVersion = list.version;
+    s.saveSettings();
+    notify();
+    await syncAll();
   } catch (err) {
     console.error('Restoring the channel list failed', err);
   }

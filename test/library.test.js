@@ -132,3 +132,20 @@ test('getChannelVideos drops Shorts, live, private and foreign videos', async ()
   const vids = await yt.getChannelVideos({ id: C, uploads: 'UUaaaaaaaaaaaaaaaaaaaaaa' }, 'k', fake);
   assert.deepStrictEqual(vids.map((v) => v.id), ['a']);
 });
+
+test('a saved list entry resolves by handle, else by name with the most subscribers', async () => {
+  const ch = (id, subs) => ({ id, snippet: { title: id, customUrl: '', thumbnails: {} }, contentDetails: { relatedPlaylists: { uploads: 'UU' + id.slice(2) } }, statistics: { subscriberCount: String(subs) } });
+  const A = 'UCaaaaaaaaaaaaaaaaaaaaaa', B = 'UCbbbbbbbbbbbbbbbbbbbbbb', K = 'UCkkkkkkkkkkkkkkkkkkkkkk';
+  const fake = async (url) => {
+    const u = new URL(url);
+    const p = u.pathname.split('/').pop();
+    let body = { items: [] };
+    if (p === 'channels' && u.searchParams.get('forHandle') === '@known') body = { items: [ch(K, 5)] };
+    if (p === 'search') body = { items: [A, B].map((channelId) => ({ snippet: { channelId } })) };
+    if (p === 'channels' && u.searchParams.get('id') === `${A},${B}`) body = { items: [ch(A, 10), ch(B, 900)] };
+    return { ok: true, json: async () => body };
+  };
+  assert.strictEqual((await yt.resolveChannel({ handle: '@known', q: 'x' }, 'k', fake)).id, K);
+  assert.strictEqual((await yt.resolveChannel({ handle: '@missing', q: 'x' }, 'k', fake)).id, B);
+  assert.strictEqual(await yt.resolveChannel({ handle: '@missing' }, 'k', fake), null);
+});

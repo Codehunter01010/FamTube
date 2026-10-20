@@ -105,6 +105,16 @@ async function searchChannels(query, key, fetchImpl = fetch) {
   return ids.map((id) => byId.get(id)).filter(Boolean);
 }
 
+// Turns an entry of a saved channel list into a channel: by ID, by @handle,
+// or else by name, taking the match with the most subscribers.
+async function resolveChannel(entry, key, fetchImpl = fetch) {
+  const ref = entry.id || entry.handle;
+  const found = ref ? await getChannel(ref, key, fetchImpl) : null;
+  if (found || !entry.q) return found;
+  const results = (await searchChannels(entry.q, key, fetchImpl)).slice(0, 5);
+  return results.sort((a, b) => b.subscribers - a.subscribers)[0] || null;
+}
+
 // "PT1H2M3S" -> 3723
 function parseDuration(iso) {
   const m = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso || '');
@@ -164,5 +174,6 @@ module.exports = {
   isShort,
   getChannel,
   searchChannels,
+  resolveChannel,
   getChannelVideos,
 };

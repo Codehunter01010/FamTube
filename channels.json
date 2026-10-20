@@ -1,0 +1,21 @@
+{
+  "famtube": 1,
+  "version": 1,
+  "channels": [
+    { "handle": "@touzanitv", "q": "Touzani TV", "categories": ["Soccer"] },
+    { "q": "National Geographic Junior Nederland", "categories": ["Animals", "Learning"] },
+    { "handle": "@bbcearth", "q": "BBC Earth", "categories": ["Animals"] },
+    { "handle": "@fifa", "q": "FIFA", "categories": ["Soccer"] },
+    { "handle": "@championsleague", "q": "UEFA Champions League", "categories": ["Soccer"] },
+    { "handle": "@premierleague", "q": "Premier League", "categories": ["Soccer"] },
+    { "handle": "@eredivisie", "q": "Eredivisie", "categories": ["Soccer"] },
+    { "q": "FIFA World Cup", "categories": ["Soccer"] },
+    { "handle": "@freekvonk", "q": "Freek Vonk", "categories": ["Animals"] },
+    { "handle": "@topdoks", "q": "Topdoks", "categories": ["Learning"] },
+    { "handle": "@jeugdjournaal", "q": "NOS Jeugdjournaal", "categories": ["Learning"] },
+    { "q": "NARUTO BORUTO Official", "categories": ["Anime"] },
+    { "q": "Tom and Jerry", "categories": ["Cartoons"] },
+    { "handle": "@teletubbiesnederlands", "q": "Teletubbies Nederlands", "categories": ["Cartoons"] },
+    { "q": "Bumba Nederlands", "categories": ["Cartoons"] }
+  ]
+}
